@@ -1,20 +1,47 @@
-services:
-  rosa-robotics-bridge:
-    image: ros:humble-ros-base
-    container_name: kryptic-rosa-bridge
-    volumes:
-      - ./edge/golden-rosa-template:/workspace/rosa
-      - ./edge/bio-edge-organism:/workspace/bio
-    working_dir: /workspace/rosa
-    command: bash -c "pip install -r requirements.txt && python3 server.py"
-    ports:
-      - "8002:8002"
+cp docker-compose.yml docker-compose.yml.bak 2>/dev/null || true
 
-  root-science-engine:
-    image: rootproject/root:latest
-    container_name: kryptic-root-engine
+cat << 'EOF' > docker-compose.yml
+services:
+  omni-core:
+    image: python:3.11-slim
+    container_name: kryptic-omni-core
+    working_dir: /workspace
     volumes:
-      - ./services/root:/workspace/root
-    working_dir: /workspace/root
-    tty: true
-    
+      - .:/workspace
+    environment:
+      - OMNI_MOCK_MODE=1
+      - PYTHONUNBUFFERED=1
+    command: >
+      bash -c "chmod +x scripts/*.sh &&
+               ./scripts/verify_omni.sh --mock &&
+               python3 scripts/dashboard.py --once --mock &&
+               tail -f /dev/null"
+    networks:
+      - omni-net
+
+  ros2-bridge:
+    image: ros:humble-ros-base
+    container_name: kryptic-ros2-bridge
+    working_dir: /ros2_ws
+    volumes:
+      - .:/ros2_ws
+    environment:
+      - ROS_DOMAIN_ID=7
+    command: bash -c "source /opt/ros/humble/setup.bash && ros2 topic list && tail -f /dev/null"
+    networks:
+      - omni-net
+
+  cern-root:
+    image: rootproject/root:latest
+    container_name: kryptic-cern-root
+    working_dir: /analytics
+    volumes:
+      - .:/analytics
+    command: bash -c "root --version && tail -f /dev/null"
+    networks:
+      - omni-net
+
+networks:
+  omni-net:
+    driver: bridge
+EOF
