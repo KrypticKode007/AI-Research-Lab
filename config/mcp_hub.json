@@ -1,0 +1,39 @@
+{
+  "orchestrator": "Golden-Agent",
+  "version": "1.0.0",
+  "mcpServers": {
+    "holonomic-memory": {
+      "command": "python3",
+      "args": ["core/Holonomic-Sentience/main.py"],
+      "role": "persistent_state_and_context"
+    },
+    "device-bridge": {
+      "command": "bash",
+      "args": ["interfaces/kai-007/bridge.sh"],
+      "env": {
+        "SCRCPY_PATH": "./interfaces/scrcpy"
+      },
+      "role": "macos_android_control"
+    },
+    "robotics-rosa": {
+      "command": "python3",
+      "args": ["edge/golden-rosa-template/server.py"],
+      "role": "ros2_and_hardware_control"
+    },
+    "audio-mastering": {
+      "command": "uvicorn",
+      "args": ["services.PatchPilot.app:app", "--host", "127.0.0.1", "--port", "8001"],
+      "role": "media_processing"
+    },
+    "cyber-intel": {
+      "command": "python3",
+      "args": ["services/nkryptd/mcp_server.py"],
+      "role": "security_and_bi"
+    },
+    "silent-failure-auditor": {
+      "command": "python3",
+      "args": ["devops/Silent-failure-hunter/cli.py", "--scan-all"],
+      "role": "self_healing_diagnostics"
+    }
+  }
+  }
