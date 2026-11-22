@@ -1,12 +1,16 @@
 {
-  "orchestrator": "Golden-Agent",
-  "version": "1.0.0",
+{
   "mcpServers": {
-    "holonomic-memory": {
-      "command": "python3",
-      "args": ["core/Holonomic-Sentience/main.py"],
-      "role": "persistent_state_and_context"
-    },
+    "kryptic-omni-orchestrator": {
+      "command": "/Users/KrypticKode007/kryptic-omni-core/.venv/bin/python",
+      "args": ["/Users/KrypticKode007/kryptic-omni-core/core/omni_bridge.py"],
+      "env": {
+        "PYTHONPATH": "/Users/KrypticKode007/kryptic-omni-core",
+        "OMNI_ENV": "macos"
+      }
+    }
+  }
+},
     "device-bridge": {
       "command": "bash",
       "args": ["interfaces/kai-007/bridge.sh"],
