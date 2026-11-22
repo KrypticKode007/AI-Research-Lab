@@ -1,3 +1,0 @@
-git submodule foreach 'git push -u origin dev feat/mcp-bridge feat/edge-telemetry fix/self-healing'
-git submodule foreach 'git checkout dev && git pull origin dev'
-tail -f logs/omni_bridge.out.log logs/omni_bridge.err.log
