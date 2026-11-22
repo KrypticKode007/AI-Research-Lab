@@ -1,0 +1,20 @@
+services:
+  rosa-robotics-bridge:
+    image: ros:humble-ros-base
+    container_name: kryptic-rosa-bridge
+    volumes:
+      - ./edge/golden-rosa-template:/workspace/rosa
+      - ./edge/bio-edge-organism:/workspace/bio
+    working_dir: /workspace/rosa
+    command: bash -c "pip install -r requirements.txt && python3 server.py"
+    ports:
+      - "8002:8002"
+
+  root-science-engine:
+    image: rootproject/root:latest
+    container_name: kryptic-root-engine
+    volumes:
+      - ./services/root:/workspace/root
+    working_dir: /workspace/root
+    tty: true
+    
