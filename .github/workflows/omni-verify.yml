@@ -1,0 +1,17 @@
+# 1. Ensure local backup files aren't accidentally committed
+grep -qxF "*.bak" .gitignore 2>/dev/null || echo "*.bak" >> .gitignore
+grep -qxF "*.bak.py" .gitignore 2>/dev/null || echo "*.bak.py" >> .gitignore
+grep -qxF "core/.forge_snapshots/" .gitignore 2>/dev/null || echo "core/.forge_snapshots/" >> .gitignore
+grep -qxF "core/forged_tools/" .gitignore 2>/dev/null || echo "core/forged_tools/" >> .gitignore
+
+# 2. Switch to (or create) the dev branch and run verification
+git checkout -B dev
+./scripts/verify_omni.sh --mock
+
+# 3. Stage, commit, and push all Systems Engineering artifacts
+git add .gitignore .github/workflows/omni-verify.yml docs/SYSTEMS_ENGINEERING.md \
+        core/ast_sandbox.py core/capability_forge.py core/omni_bridge.py \
+        scripts/verify_omni.sh README.md
+
+git commit -m "feat(syseng): add RVM/ICD specs, AST sandbox, OmniBridge, and CI verification"
+git push -u origin dev
