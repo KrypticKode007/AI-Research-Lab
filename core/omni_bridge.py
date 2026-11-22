@@ -1,14 +1,14 @@
-import asyncio
-import json
-import os
 import subprocess
-from core.entry_resolver 
-import resolve_entrypoint
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
-# Standard MCP stdio / FastMCP compatible bridge
 from mcp.server.fastmcp import FastMCP
+from core.entry_resolver import resolve_entrypoint
+from core.capability_forge import (
+    FORGED_DIR,
+    forge_and_verify_skill,
+    run_forged_skill,
+)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 mcp = FastMCP("Kryptic-Omni-Orchestrator")
@@ -34,12 +34,20 @@ def _run_cmd(cmd: list[str], cwd: Path = ROOT_DIR, timeout: int = 60) -> Dict[st
         return {"returncode": -1, "stdout": "", "stderr": f"CRITICAL_BRIDGE_ERROR: {exc}"}
 
 
+def _run_repo(rel_path: str, args: list[str] | None = None, timeout: int = 60) -> Dict[str, Any]:
+    """Resolve a submodule's entry point dynamically and execute it."""
+    repo_dir = ROOT_DIR / rel_path
+    entry = resolve_entrypoint(repo_dir)
+    if not entry:
+        return {"returncode": -1, "stdout": "", "stderr": f"Entrypoint not found in {rel_path}"}
+    return _run_cmd(["python3", str(entry)] + (args or []), cwd=entry.parent, timeout=timeout)
+
+
 # --- 1. COGNITIVE & MEMORY LAYER ---
 @mcp.tool()
 def query_holonomic_memory(prompt: str) -> Dict[str, Any]:
-    """Route context queries through Holonomic-Sentience-Core & Advanced-Ai-Model."""
-    target = ROOT_DIR / "core" / "Holonomic-Sentience"
-    return _run_cmd(["python3", "-m", "holonomic_core", "--query", prompt], cwd=target)
+    """Route context queries through Holonomic-Sentience-Core."""
+    return _run_repo("core/Holonomic-Sentience", ["--query", prompt])
 
 
 # --- 2. MACOS & ANDROID INTERFACE LAYER ---
@@ -60,10 +68,9 @@ def control_android_device(action: str = "mirror", args: str = "") -> Dict[str, 
 @mcp.tool()
 def master_audio_track(input_path: str, reference_path: str) -> Dict[str, Any]:
     """Trigger PatchPilot audio mastering job."""
-    patch_dir = ROOT_DIR / "services" / "PatchPilot"
-    return _run_cmd(
-        ["python3", "cli.py", "--target", input_path, "--reference", reference_path],
-        cwd=patch_dir,
+    return _run_repo(
+        "services/PatchPilot",
+        ["--target", input_path, "--reference", reference_path],
         timeout=300,
     )
 
@@ -71,41 +78,31 @@ def master_audio_track(input_path: str, reference_path: str) -> Dict[str, Any]:
 @mcp.tool()
 def run_nkryptd_intel_scan(scope: str = "full") -> Dict[str, Any]:
     """Execute -nkryptd cyber-resilience and business intelligence pipeline."""
-    nk_dir = ROOT_DIR / "services" / "nkryptd"
-    return _run_cmd(["python3", "main.py", "--mode", scope], cwd=nk_dir)
+    return _run_repo("services/nkryptd", ["--mode", scope])
 
-entry = resolve_entrypoint(ROOT_DIR / "services" / "nkryptd")
-if not entry:
-    return {"returncode": -1, "stdout": "", "stderr": "Entrypoint not found in nkryptd"}
-return _run_cmd(["python3", str(entry)], cwd=entry.parent)
-                       
+
 # --- 4. EDGE, ROBOTICS & BATTERY TELEMETRY LAYER ---
 @mcp.tool()
 def dispatch_rosa_command(ros_command: str) -> Dict[str, Any]:
     """Forward natural-language robotics directives to golden-rosa-template."""
-    rosa_dir = ROOT_DIR / "edge" / "golden-rosa-template"
-    return _run_cmd(["python3", "rosa_bridge.py", "--cmd", ros_command], cwd=rosa_dir)
+    return _run_repo("edge/golden-rosa-template", ["--cmd", ros_command])
 
 
 @mcp.tool()
 def check_edge_homeostasis() -> Dict[str, Any]:
     """Poll bio-edge-organism SNN state and Autonomous-self-healing-battery health."""
-    bio = _run_cmd(
-        ["python3", "status.py"], cwd=ROOT_DIR / "edge" / "bio-edge-organism"
-    )
-    bat = _run_cmd(
-        ["python3", "diagnostics.py"], cwd=ROOT_DIR / "edge" / "self-healing-battery"
-    )
-    return {"bio_edge": bio, "battery_system": bat}
+    return {
+        "bio_edge": _run_repo("edge/bio-edge-organism"),
+        "battery_system": _run_repo("edge/self-healing-battery"),
+    }
 
 
 # --- 5. SELF-HEALING DEVOPS & CODE IMMUNE SYSTEM ---
 @mcp.tool()
 def audit_and_heal_workspace(target_repo: str = ".", auto_fix: bool = False) -> Dict[str, Any]:
-    """Run Silent-failure-hunter- & Bug-away across submodules; optionally invoke claude-code."""
+    """Run Silent-failure-hunter- across submodules; optionally invoke claude-code."""
     scan_path = (ROOT_DIR / target_repo).resolve()
-    hunter_dir = ROOT_DIR / "devops" / "Silent-failure-hunter"
-    audit = _run_cmd(["python3", "hunter.py", str(scan_path)], cwd=hunter_dir)
+    audit = _run_repo("devops/Silent-failure-hunter", [str(scan_path)])
 
     result: Dict[str, Any] = {"audit": audit}
     if auto_fix and audit["returncode"] != 0:
@@ -119,5 +116,31 @@ def audit_and_heal_workspace(target_repo: str = ".", auto_fix: bool = False) -> 
     return result
 
 
+# --- 6. UNIVERSAL CAPABILITY FORGE (DYNAMIC SKILL SYNTHESIS) ---
+@mcp.tool()
+def synthesize_new_capability(
+    skill_name: str, task_specification: str, language: str = "python"
+) -> Dict[str, Any]:
+    """Build, audit, and register a brand-new tool on the fly for any unforeseen task."""
+    return forge_and_verify_skill(skill_name, task_specification, language)
+
+
+@mcp.tool()
+def execute_forged_capability(skill_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Hot-load and run any previously synthesized skill in core/forged_skills/."""
+    return run_forged_skill(skill_name, payload)
+
+
+@mcp.tool()
+def list_forged_capabilities() -> List[str]:
+    """List all dynamically synthesized skills currently available in the forge."""
+    if not FORGED_DIR.exists():
+        return []
+    return sorted(
+        f.stem for f in FORGED_DIR.iterdir() if f.is_file() and f.name != "__init__.py"
+    )
+
+
 if __name__ == "__main__":
     mcp.run()
+                
