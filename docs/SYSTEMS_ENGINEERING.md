@@ -1,4 +1,3 @@
-mkdir -p docs && cat << 'EOF' > docs/SYSTEMS_ENGINEERING.md
 # Systems Engineering Specification: Kryptic Omni-Core
 
 **System:** `kryptic-omni-core` (`AI-Research-Lab`)  
