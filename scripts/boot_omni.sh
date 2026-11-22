@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+[ -f "assets/kryptic_omni_core.ascii" ] && cat assets/kryptic_omni_core.ascii
+echo ""
+
 echo "🍎 [1/6] Checking macOS system dependencies via Homebrew..."
 BREW_PKGS=(python@3.12 node cmake scrcpy android-platform-tools)
 for pkg in "${BREW_PKGS[@]}"; do
