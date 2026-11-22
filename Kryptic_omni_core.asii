@@ -1,0 +1,26 @@
+kryptic-omni-core/
+├── core/                        # Central brain, routing & persistent memory
+│   ├── Golden-Agent/            # Primary DAG orchestrator & MCP hub
+│   ├── Holonomic-Sentience/     # (KrypticKode007-Holonomic-Sentience-Core)
+│   └── Advanced-Ai-Model/       # Specialized autonomy mini-agents
+├── interfaces/                  # Device control & user interaction
+│   ├── kai-007/                 # macOS & Android 15+ shell assistant
+│   └── scrcpy/                  # Offline Android display & input bridge
+├── services/                    # Domain microservices & compute engines
+│   ├── PatchPilot/              # FastAPI audio mastering service
+│   ├── nkryptd/                 # (-nkryptd) Cyber-resilience & BI engine
+│   └── root/                    # C++ scientific big-data processing
+├── edge/                        # Robotics, neuromorphic & power hardware
+│   ├── golden-rosa-template/    # NASA-JPL ROSA / ROS2 MCP bridge
+│   ├── bio-edge-organism/       # C++11 / Python SNN & ESP32 active inference
+│   ├── Autonomous-Battery/      # (Autonomous-Battery-)
+│   └── self-healing-battery/    # (Autonomous-self-healing-battery)
+├── devops/                      # Self-healing CI/CD & automated patching
+│   ├── Bug-away/                # Universal Fortress CI/CD pipeline
+│   ├── Silent-failure-hunter/   # (Silent-failure-hunter-) Error & exception scanner
+│   └── claude-code/             # Terminal-level agentic code repair
+├── config/
+│   └── mcp_hub.json             # Master MCP routing table for Golden-Agent
+├── scripts/
+│   └── health_check.sh          # Cross-repo audit & service launcher
+└── docker-compose.yml           # Containerized microservice orchestration
