@@ -13,5 +13,5 @@ git add .gitignore .github/workflows/omni-verify.yml docs/SYSTEMS_ENGINEERING.md
         core/ast_sandbox.py core/capability_forge.py core/omni_bridge.py \
         scripts/verify_omni.sh README.md
 
-git commit -m "feat(syseng): add RVM/ICD specs, AST sandbox, OmniBridge, and CI verification"
+git commit -m "feat(syseng)": add RVM/ICD specs, AST sandbox, OmniBridge, and CI verification
 git push -u origin dev
