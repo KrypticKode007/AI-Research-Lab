@@ -74,7 +74,11 @@ def run_nkryptd_intel_scan(scope: str = "full") -> Dict[str, Any]:
     nk_dir = ROOT_DIR / "services" / "nkryptd"
     return _run_cmd(["python3", "main.py", "--mode", scope], cwd=nk_dir)
 
-
+entry = resolve_entrypoint(ROOT_DIR / "services" / "nkryptd")
+if not entry:
+    return {"returncode": -1, "stdout": "", "stderr": "Entrypoint not found in nkryptd"}
+return _run_cmd(["python3", str(entry)], cwd=entry.parent)
+                       
 # --- 4. EDGE, ROBOTICS & BATTERY TELEMETRY LAYER ---
 @mcp.tool()
 def dispatch_rosa_command(ros_command: str) -> Dict[str, Any]:
