@@ -1,6 +1,3 @@
-cp scripts/verify_omni.sh scripts/verify_omni.sh.bak 2>/dev/null || true
-
-cat << 'EOF' > scripts/verify_omni.sh
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -51,9 +48,8 @@ verify_req_01() {
   log_info "REQ-01: Checking Cognitive Core routing decision latency (<= 15 ms)..."
   if [ -f "core/entry_resolver.py" ]; then
     LATENCY_MS=$(python3 -c '
-import time
+import ast, time
 start = time.perf_counter()
-import ast
 with open("core/entry_resolver.py", "r") as f:
     ast.parse(f.read())
 elapsed = (time.perf_counter() - start) * 1000
@@ -69,17 +65,27 @@ print(f"{elapsed:.2f}")
 # REQ-02: Capability Forge AST Safety Audit (0 unapproved dangerous builtins)
 # ------------------------------------------------------------------------------
 verify_req_02() {
-  log_info "REQ-02: Auditing Capability Forge AST sandbox gates..."
-  if [ -f "core/capability_forge.py" ]; then
+  log_info "REQ-02: Running Capability Forge AST sandbox positive & negative injection tests..."
+  if [ -f "core/ast_sandbox.py" ]; then
     python3 -c '
-import ast, sys
-with open("core/capability_forge.py", "r") as f:
-    tree = ast.parse(f.read())
-assert tree is not None
-' && log_pass "REQ-02: core/capability_forge.py syntax & AST audit hook verified" \
-  || log_fail "REQ-02: AST validation failed on core/capability_forge.py"
+from core.ast_sandbox import audit_source
+
+# 1. Valid synthesized tool must pass
+good = audit_source("import json, math\ndef run(x: float) -> str:\n    return json.dumps({\"val\": math.sqrt(x)})")
+assert good.safe, f"Expected safe code to pass, got: {good.violations}"
+
+# 2. Dangerous payloads must be blocked
+for payload in [
+    "import os\nos.system(\"rm -rf /\")",
+    "def run(x): return eval(x)",
+    "def escape(): return ().__class__.__base__.__subclasses__()"
+]:
+    res = audit_source(payload)
+    assert not res.safe, f"Sandbox failed to block payload: {payload}"
+' && log_pass "REQ-02: AST sandbox blocked 3/3 injection payloads & passed valid tool" \
+  || log_fail "REQ-02: AST sandbox injection test failed"
   else
-    log_fail "REQ-02: Missing core/capability_forge.py"
+    log_fail "REQ-02: Missing core/ast_sandbox.py"
   fi
 }
 
@@ -114,12 +120,22 @@ verify_req_04() {
 }
 
 # ------------------------------------------------------------------------------
-# REQ-05: Omni-Bridge Graceful Degradation
+# REQ-05: Omni-Bridge Graceful Degradation & IF-01/03/04 Routing
 # ------------------------------------------------------------------------------
 verify_req_05() {
-  log_info "REQ-05: Verifying omni_bridge.py integration & fallback readiness..."
+  log_info "REQ-05: Running OmniBridge graceful degradation & IF-01/03/04 integration check..."
   if [ -f "core/omni_bridge.py" ]; then
-    log_pass "REQ-05: core/omni_bridge.py present and ready"
+    python3 -c '
+from core.omni_bridge import OmniBridge
+
+bridge = OmniBridge(mock_mode=True)
+health = bridge.probe_all()
+assert all(s["healthy"] for s in health["subsystems"]), f"Unhealthy subsystem: {health}"
+
+res = bridge.dispatch_ros2_mission("/omni/test", {"ping": True})
+assert res["mode"] == "MOCK", f"Expected MOCK mode, got {res}"
+' && log_pass "REQ-05: OmniBridge passed graceful mock degradation & IF-01/03/04 routing" \
+  || log_fail "REQ-05: OmniBridge integration test failed"
   else
     log_fail "REQ-05: Missing core/omni_bridge.py"
   fi
@@ -161,4 +177,4 @@ echo "============================================================"
 [ "$FAIL_COUNT" -eq 0 ] && exit 0 || exit 1
 EOF
 
-chmod +x scripts/verify_omni.sh
+chmod +x scripts/verify_omni.sh && ./scripts/verify_omni.sh --mock
