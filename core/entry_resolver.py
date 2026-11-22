@@ -3,12 +3,13 @@ from typing import Optional
 
 CANDIDATES = [
     "main.py", "app.py", "server.py", "cli.py",
-    "bridge.py", "orchestrator.py", "hunter.py", "run.py"
+    "bridge.py", "orchestrator.py", "hunter.py", "run.py",
+    "kai.sh", "run.sh", "bridge.sh",
 ]
 
 
 def resolve_entrypoint(repo_path: Path) -> Optional[Path]:
-    """Locate the primary executable Python file inside a submodule."""
+    """Locate the primary executable file inside a submodule."""
     if not repo_path.exists():
         return None
     for name in CANDIDATES:
@@ -24,4 +25,4 @@ def resolve_entrypoint(repo_path: Path) -> Optional[Path]:
                     return nested
     py_files = sorted(repo_path.glob("*.py"))
     return py_files[0] if py_files else None
-  
+                    
