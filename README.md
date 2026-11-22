@@ -129,7 +129,7 @@ docker compose up -d
 
 <div align="center">
 
-**Engineered by [Brandon Wilson (`@KrypticKode007`)](https://www.github.com/KrypticKode007**
+**Engineered by [Brandon Wilson (`@KrypticKode007`)](https://www.github.com/KrypticKode007)**
 *KrypticSoundz LLC • AI Software Engineering*
 
 </div>
