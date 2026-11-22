@@ -105,7 +105,7 @@ main                  ──▶ Locked production baseline (verified merges only
 ## 🚀 One-Command Launch (macOS)
 
 ```bash
-git clone https://github.com/kryptic-omni-core.git && \
+git clone https://github.com/ai-research-lab.git && \
 cd kryptic-omni-core && \
 git checkout dev && \
 chmod +x scripts/*.sh && \
@@ -129,7 +129,7 @@ docker compose up -d
 
 <div align="center">
 
-**Engineered by [Brandon Wilson (`@KrypticKode007`)](https://github.com)**
+**Engineered by [Brandon Wilson (`@KrypticKode007`)](https://www.github.com/KrypticKode007**
 *KrypticSoundz LLC • AI Software Engineering*
 
 </div>
