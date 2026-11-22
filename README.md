@@ -106,7 +106,7 @@ main                  ──▶ Locked production baseline (verified merges only
 
 ```bash
 git clone https://github.com/ai-research-lab.git && \
-cd kryptic-omni-core && \
+cd ai-research-lab && \
 git checkout dev && \
 chmod +x scripts/*.sh && \
 ./scripts/setup.sh && \
