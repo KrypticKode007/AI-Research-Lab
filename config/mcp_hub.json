@@ -1,43 +1,24 @@
 {
-{
+  "orchestrator": "Golden-Agent",
+  "mode": "universal-autonomous",
+  "version": "2.0.0",
+  "capabilities": {
+    "holonomic_memory": true,
+    "capability_forge": true,
+    "self_healing_immune_system": true,
+    "edge_neuromorphic_bridge": true,
+    "device_control": ["macos", "android-15+"]
+  },
   "mcpServers": {
     "kryptic-omni-orchestrator": {
-      "command": "/Users/KrypticKode007/kryptic-omni-core/.venv/bin/python",
-      "args": ["/Users/KrypticKode007/kryptic-omni-core/core/omni_bridge.py"],
+      "command": "python3",
+      "args": ["core/omni_bridge.py"],
       "env": {
-        "PYTHONPATH": "/Users/KrypticKode007/kryptic-omni-core",
-        "OMNI_ENV": "macos"
+        "PYTHONPATH": ".",
+        "OMNI_ENV": "macos",
+        "OMNI_FORGE_DIR": "core/forged_skills",
+        "OMNI_AUTO_HEAL": "true"
       }
     }
   }
-},
-    "device-bridge": {
-      "command": "bash",
-      "args": ["interfaces/kai-007/bridge.sh"],
-      "env": {
-        "SCRCPY_PATH": "./interfaces/scrcpy"
-      },
-      "role": "macos_android_control"
-    },
-    "robotics-rosa": {
-      "command": "python3",
-      "args": ["edge/golden-rosa-template/server.py"],
-      "role": "ros2_and_hardware_control"
-    },
-    "audio-mastering": {
-      "command": "uvicorn",
-      "args": ["services.PatchPilot.app:app", "--host", "127.0.0.1", "--port", "8001"],
-      "role": "media_processing"
-    },
-    "cyber-intel": {
-      "command": "python3",
-      "args": ["services/nkryptd/mcp_server.py"],
-      "role": "security_and_bi"
-    },
-    "silent-failure-auditor": {
-      "command": "python3",
-      "args": ["devops/Silent-failure-hunter/cli.py", "--scan-all"],
-      "role": "self_healing_diagnostics"
-    }
-  }
-  }
+}
