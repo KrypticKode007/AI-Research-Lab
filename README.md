@@ -21,7 +21,16 @@
 
 </div>
 
+[![Kryptic Omni-Core Verification](https://github.com)](https://github.com)
+[![License](https://shields.io)](LICENSE)
+[![Systems Spec](https://shields.io)](docs/SYSTEMS_ENGINEERING.md)
+
 ---
+### **Sovereign Cyber-Physical AI Operating Layer & Universal Capability Engine**
+
+*Kryptic Omni-Core** is a closed-loop cyber-physical organism combining multi-agent DAG reasoning, offline cross-OS device control, neuromorphic reflexes, and self-healing code synthesis. 
+
+For the complete ASCII art banner, repository matrix, systems engineering specs, and quickstart commands, please reference the full source documentation in the repository files or view the complete Markdown layout in the raw block provided above.
 
 ## ⚡ Why Kryptic Omni-Core Is One of a Kind
 
