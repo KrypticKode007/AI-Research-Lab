@@ -2,6 +2,8 @@ import asyncio
 import json
 import os
 import subprocess
+from core.entry_resolver 
+import resolve_entrypoint
 from pathlib import Path
 from typing import Any, Dict
 
