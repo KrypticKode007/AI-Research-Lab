@@ -1,0 +1,40 @@
+name: Omni-Core Fortress & Self-Healing Pipeline
+
+on:
+  push:
+    branches: [main, dev, "feat/**", "fix/**"]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  audit-and-fortify:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Master & Submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Silent-Failure-Hunter Across Workspace
+        run: |
+          python3 -c '
+          from pathlib import Path
+          from core.entry_resolver import resolve_entrypoint
+          hunter = resolve_entrypoint(Path("devops/Silent-failure-hunter"))
+          print(f"Resolved Hunter Entrypoint: {hunter}")
+          '
+          if [ -f "devops/Silent-failure-hunter/cli.py" ]; then
+            python3 devops/Silent-failure-hunter/cli.py ./core ./services ./edge
+          fi
+
+      - name: Execute Bug-Away Quality Gates
+        run: |
+          if [ -f "devops/Bug-away/run.sh" ]; then
+            bash devops/Bug-away/run.sh
+          fi
+          
