@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-echo "🌿 [1/5] Configuring Git branch topology across master repo & all submodules..."
+echo "🌿 [1/4] Configuring Git branch topology across master repo & all submodules..."
 BRANCHES=("dev" "feat/mcp-bridge" "feat/edge-telemetry" "fix/self-healing")
 
 git checkout -B main
@@ -23,82 +23,13 @@ git submodule foreach --recursive '
   git checkout dev
 '
 
-echo "🔍 [2/5] Creating dynamic entry-point resolver (core/entry_resolver.py)..."
-cat > core/entry_resolver.py <<'PYEOF'
-from pathlib import Path
-from typing import Optional
+echo "⚒️ [2/4] Ensuring Capability Forge & log directories exist..."
+mkdir -p "$ROOT_DIR/core/forged_skills" "$ROOT_DIR/logs"
+touch "$ROOT_DIR/core/forged_skills/__init__.py"
 
-CANDIDATES = [
-    "main.py", "app.py", "server.py", "cli.py",
-    "bridge.py", "orchestrator.py", "hunter.py", "run.py"
-]
-
-def resolve_entrypoint(repo_path: Path) -> Optional[Path]:
-    """Locate the primary executable Python file inside a submodule."""
-    if not repo_path.exists():
-        return None
-    for name in CANDIDATES:
-        direct = repo_path / name
-        if direct.is_file():
-            return direct
-    for sub in ("src", "app", "core"):
-        sub_dir = repo_path / sub
-        if sub_dir.is_dir():
-            for name in CANDIDATES:
-                nested = sub_dir / name
-                if nested.is_file():
-                    return nested
-    py_files = sorted(repo_path.glob("*.py"))
-    return py_files[0] if py_files else None
-PYEOF
-
-echo "🛡️ [3/5] Installing unified GitHub Actions CI/CD (.github/workflows/omni-fortress.yml)..."
-mkdir -p .github/workflows
-cat > .github/workflows/omni-fortress.yml <<'YMLEOF'
-name: Omni-Core Fortress & Self-Healing Pipeline
-
-on:
-  push:
-    branches: [main, dev, "feat/**", "fix/**"]
-  pull_request:
-    branches: [main, dev]
-
-jobs:
-  audit-and-fortify:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Master & Submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Run Silent-Failure-Hunter Across Workspace
-        run: |
-          python3 -c '
-          from pathlib import Path
-          from core.entry_resolver import resolve_entrypoint
-          hunter = resolve_entrypoint(Path("devops/Silent-failure-hunter"))
-          print(f"Resolved Hunter Entrypoint: {hunter}")
-          '
-          if [ -f "devops/Silent-failure-hunter/cli.py" ]; then
-            python3 devops/Silent-failure-hunter/cli.py ./core ./services ./edge
-          fi
-
-      - name: Execute Bug-Away Quality Gates
-        run: |
-          if [ -f "devops/Bug-away/run.sh" ]; then
-            bash devops/Bug-away/run.sh
-          fi
-YMLEOF
-
-echo "🍎 [4/5] Installing macOS LaunchAgent daemon for always-on background orchestration..."
+echo "🍎 [3/4] Installing macOS LaunchAgent daemon for always-on background orchestration..."
 PLIST_PATH="$HOME/Library/LaunchAgents/com.kryptic.omni-orchestrator.plist"
-mkdir -p "$HOME/Library/LaunchAgents" "$ROOT_DIR/logs"
+mkdir -p "$HOME/Library/LaunchAgents"
 
 cat > "$PLIST_PATH" <<PLISTEOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -120,6 +51,10 @@ cat > "$PLIST_PATH" <<PLISTEOF
         <string>$ROOT_DIR</string>
         <key>OMNI_ENV</key>
         <string>macos</string>
+        <key>OMNI_FORGE_DIR</key>
+        <string>$ROOT_DIR/core/forged_skills</string>
+        <key>OMNI_AUTO_HEAL</key>
+        <string>true</string>
     </dict>
     <key>RunAtLoad</key>
     <true/>
@@ -136,8 +71,8 @@ PLISTEOF
 launchctl unload "$PLIST_PATH" 2>/dev/null || true
 launchctl load "$PLIST_PATH"
 
-echo "📦 [5/5] Committing initial master orchestration state to 'dev' branch..."
+echo "📦 [4/4] Committing initial master orchestration state to 'dev' branch..."
 git add .
-git commit -m "feat(orchestrator): initialize unified MCP bridge, branch topology, CI/CD & macOS daemon" || true
+git commit -m "feat(orchestrator): initialize universal MCP bridge, capability forge, branch topology & macOS daemon" || true
 
-echo "✅ Complete: All branches created, CI/CD armed, and macOS LaunchAgent active on 'dev'."
+echo "✅ Complete: All branches created, Capability Forge ready, and macOS LaunchAgent active on 'dev'."
